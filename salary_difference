@@ -1,0 +1,31 @@
+-- https://platform.stratascratch.com/coding/10308-salaries-differences?
+
+with core_data as(
+    select
+        emp.id,
+        dep.department,
+        emp.salary
+    from db_employee emp
+    left join db_dept dep
+        on emp.department_id = dep.id
+    order by dep.department desc
+),
+
+salaries as(
+    select 
+        department,
+        max(salary) as max_salary
+    from core_data
+    group by department
+    having department in ('marketing', 'engineering')
+),
+
+final as(
+    select
+        max_salary - lag(max_salary, 1) over(
+            order by max_salary asc
+        ) as salary_difference
+    from salaries
+)
+
+select * from final;
